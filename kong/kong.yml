@@ -1,0 +1,15 @@
+_format_version: "1.0"
+
+services:
+  - name: auth-server # the name of service 1
+    url:  http://172.19.88.1:3000  # the ip of host:port of server 
+    routes:
+      - name: auth # list down the route names
+        paths:
+          - /auth
+  - name: user-server # name of service 2
+    url: http://172.19.88.1:3001
+    routes:
+      - name: users
+        paths:
+          - /users

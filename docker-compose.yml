@@ -1,0 +1,56 @@
+version: '1.0'
+
+services:
+    auth:
+      build:
+          context: auth
+          dockerfile: Dockerfile
+          target: development
+      command: npm run start
+      restart: unless-stopped
+      volumes:
+        - ./auth:/user/src/app
+        - /user/src/app/node_modules
+      # networks:
+      #   - app-net
+      ports:
+        - "3000:3000"
+
+    user-server:
+      build:
+          context: user
+          dockerfile: Dockerfile
+          target: development
+      command: npm run start
+      restart: unless-stopped
+      volumes:
+        - ./user:/user/src/app2
+        - /user/src/app2/node_modules
+      # networks:
+      #   - app-net
+      ports:
+        - "3001:3001"    
+    kong:
+      image: kong
+      depends_on: 
+          - auth
+          - user-server
+      volumes: 
+        - "./kong:/usr/local/kong/declarative"
+      environment: 
+        - KONG_DATABASE=off
+        - KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
+        - KONG_PROXY_ACCESS_lOG=/dev/stdout
+        - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+        - KONG_PROXY_ERROR_LOG=/dev/stderr
+        - KONG_ADMIN_ERROR_LOG=/dev/stderr
+        - KONG_LOG_LEVEL=debug
+        - KONG_PLUGINS=bundled
+        - KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl
+      ports:
+        - "8000:8000/tcp"
+        - "127.0.0.1:7990:8001/tcp"
+        - "8443:8443/tcp"
+        - "127.0.0.1:8444:8444/tcp"
+# networks:
+#     app-net:

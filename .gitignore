@@ -1,0 +1,5 @@
+./auth/node_modules
+./user/node_modules
+
+./auth/dist
+./user/dist
